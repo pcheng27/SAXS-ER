@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="KeyWords" content="Gromacs, Amber, ACM, aMD, Molecular Dynamics, tutorial, method">
+<meta name="Author" content="Peng Cheng - chengp@mail.ustc.edu.cn" />
+<title>SAXS-ER Tutorial</title>
+<link rel="stylesheet" type="text/css" href="SAXS-ER.css">
+<style type="text/css">
+	.Constant { color: #c00000; font-weight: bold;}
+	.Identifier { color: #008080; font-weight: bold;}
+</style>
+</head>
+<body>
+<br/>
+<h1 style="text-align: center"><p>&ensp;&ensp;SAXS-ER Tutorial&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;</p></h1>
+<br/>
+<br/>
+<!--<h2 style="text-align: center"><p>SAXS-ER using ACM</p></h2> <br/>-->
+<h1>
+	What is SAXS-ER?
+</h1>
+<p>
+SAXS-ER is an iterative sampling method for selecting ensembles of large biomolecules that fit the experimental SAXS data. Download it <a href="./SAXS-ER.tar.bz2">here</a>.
+</p>
+<p>
+Uncompress the file: tar -xvf SAXS-ER.tar.bz2, there are four folders: ACM-1.3, ACM-2.1, aMD-1.3, aMD-2.1. In ACM-1.3, we select the ensemble using EOM 1.0 after ACM simulation, while we use EOM 2.0 in ACM-2.1; In aMD-1.3, we select the ensemble using EOM 1.0 after aMD simulation, while we use EOM 2.0 in aMD-2.1.
+</p>
+<br/>
+<hr/>
+<h1>
+    <p>How to use SAXS-ER using ACM?</p>
+</h1>
+1) Pre-installed software
+<pre>
+   GROMACS (version 4.5,5)  we have placed an excutable mdrun_mpi under the directory /bin that can run ACM simulations.
+   ATSAS (version 2.4.3-1)  the version of GAJOE is 1.3 as a component of ATSAS.
+   ATSAS (version 2.7.2-5)  the version of GAJOE is 2.1 as a component of ATSAS.
+</pre>
+2) Setup the system using GROMACS
+<pre>
+   The following files are obtained:
+   fbp.ndx     -   index of "System" and "Protein";
+   fbp_pr.gro  -   the structure after MD with positional restraints
+   pr.pdb      -   the structure containing the solute from fbp_pr.gro
+   fbp.top     -   topology file
+   md.mdp      -   a template file of MD parameters
+   initmp.ami  -   a template file of ACM parematers
+</pre>
+3) Go into the Cycle00 and run a preliminary ACM simulation with 100 ps
+<span class="inline_code">
+<pre>
+   cd Cycle00
+   cp ../fbp.ndx .
+   cp ../fbp_pr.gro .
+   cp ../pr.pdb 00.pdb
+   cp ../fbp.top .
+   cp ../md.mdp cyc00-00.mdp
+   cp ../initmp.ami . <br />
+   edit your machinefile
+   modify cyc00-00.mdp, add a random number to replace "genseed"
+   ./produceAmi.py cyc00-00.ami 00.pdb
+   ./grompp-cyc00-00.sh
+   nohup ./mdrun-cyc00-00.sh &amp;
+</pre>
+</span>
+4) Run cycles of SAXS-ER
+<span class="inline_code">
+<pre>
+   cd ..
+   edit your machinefiles
+   edit run-SAXSER.py to change the number of cycles
+   nohup ./run-SAXSER.py &amp;
+</pre>
+</span>
+<h1><p>Data processing</p></h1>
+<p>When both Chi and Rg converge, you need to do data processing next. In the directory
+``fit``, the file ``protein_ca.ndx`` is the index for Protein and the specific C-alpha
+that you want to fit, and ``fit_ensemble.sh`` is to fit the ensemble.</p>
+<span class="inline_code">
+  <pre>
+   cd fit/
+   chmod +x fit_ensemble.sh
+   ./fit_ensemble.sh ../Cycle??</pre>
+</span>
+Then the 20 conformers in the directory 'ensemble' were fitted to the first one using the WW1 domain. you can view them by VMD. (there is also a pre-generated VMD source file &quot;fbp.vmd&quot; for your convenience to see the ensemble)
+</pre>
+<br />
+<br />
+<img src="images/fbp.png" width="350" height="350" align="center"/>
+<h1><p>Supplementary instruction</p></h1>
+<pre>
+<span class="Constant">``run-SAXSER.py``</span>       - the main program
+<span class="Constant">``module_SAXSER.py``</span>    - the module called by the main program ``run-SAXSER.py``
+<span class="Constant">``produceAmi.py``</span>       - generate ".ami" file from ``initmp.ami`` and corresponding
+                          pdb file
+<span class="Constant">``Fbp21ww.dat``</span>         - experimental SAXS data
+<span class="Constant">``input``</span>               - the directory containing input files for EOM
+<span class="Constant">``runCrysol.sh``</span>        - doing crysol calculation
+<span class="Constant">``selectEnsemble.sh``</span>   - using EOM to select ensemble
+<span class="Constant">``Continue Running``</span>    - if you want to continue running after finishing some cycles
+                          conuted by ten, you need modify ``run-SAXSER.py``.
+                          for example:
+                          START=10
+                          END=20
+</pre>
+<p><pre>Execute <span class="Identifier">`./selectChi.sh`</span> to extract the chi values from each cycle. ``chi.dat`` file is generated, the first column is the order number of cycles, and the second colum is the chi value of every cycle. Execute `xmgrace chi.dat` to get the curve graph of ``chi.dat``.</pre></p>
+<p><pre>Execute <span class="Identifier">`./selectRg.sh`</span> to extract Rg values from each cycle. ``Rg.dat`` file is generated, the first column is the order number of cycles, and the second colum is the Rg value of every cycle. Execute `xmgrace Rg.dat` to get the curve graph of ``Rg.dat``.</pre></p>
+<pre>
+Execute <span class="Identifier">`./rm_files.sh`</span> to delete some unimportant and unnecessary files with specific suffix to save your disk storage space. However, the files in &quot;GA001/pdbs/&quot;, &quot;GA001/curve_1/pdbs/&quot; or &quot;fit/&quot; will not be removed. Please use this script carefully.
+	<span class="Identifier">`./rm_files.sh`</span>
+                             ``Y``   remove files with the suffix
+                             ``n``   do not remove
+        ``q or press 'enter' key``   exit the program</pre>
+
+
+<br/>
+<hr/>
+
+
+<h1><p>How to use SAXS-ER using aMD?</p></h1>
+<pre>
+1) Pre-installed software
+   AMBER (we use version 14)
+   ATSAS (version 2.4.3-1)   the version of GAJOE is 1.3 as a component of ATSAS.
+   ATSAS (version 2.7.2-5)   the version of GAJOE is 2.1 as a component of ATSAS.
+
+2) Setup the system using AMBER
+   The following files are obtained:
+   dsam-md1.rst    - the restart file after heatup precedure
+   dsam_wat.prmtop - toplogy file
+
+   You need to run a standard MD to estimate those aMD parameters (we did 200 ns)
+   prepare your amd.in
+
+3) Go into the Cycle00 and run a preliminary aMD simulation with 100 ps
+<span class="inline_code"><br />   mkdir Cycle00
+   cd Cycle00
+   cp ../dsam-md1.rst .
+   edit your machinefile
+   nohup ./cyc00-00.sh &amp;
+</span>
+4) Run cycles of SAXS-ER
+<span class="inline_code"><br />   cd ..
+   edit your machinefiles
+   edit run-SAXSER.py to change the number of cycles
+   nohup ./run-SAXSER.py &amp;</span></pre>
+<h1><p>Data processing</p></h1>
+<pre>
+When both Chi and Rg converge, you need to do data processing next. In the directory ``fit``, the script ``divide_pdbs.py`` is to divide 20 conformers in one file into separate pdb files, and ``fit_ensemble.sh`` is to fit the conformers.
+    <span class="inline_code">
+    cd fit/
+    chmod +x fit_ensemble.sh
+    ./fit_ensemble.sh ../Cycle??
+    </span>
+Then the 20 conformers in the directory 'ensemble' were fitted to the first one using the P4 subdomain, you can view them by VMD. (there is also a pre-generated VMD  source file &quot;riboswitch.vmd&quot; for your convenience to see the ensemble)</pre>
+<br />
+<img src="images/aptamer.png" width="350" height="350" align="center"/>
+<h1><p>Supplementary instruction</p></h1>
+<pre>
+<span class="Constant">``run-SAXSER.py``</span>       - the main program
+<span class="Constant">``module_SAXSER.py``</span>    - the module called by the main program ``run-SAXSER.py``
+<span class="Constant">``RNA_1.dat``</span>           - experimental SAXS data
+<span class="Constant">``input``</span>               - the directory containing input files for EOM
+<span class="Constant">``runCrysol.sh``</span>        - doing crysol calculation
+<span class="Constant">``selectEnsemble.sh``</span>   - using EOM to select ensemble
+<span class="Constant">``Continue Running``</span>    - if you want to continue running after finishing some cycles
+                          conuted by ten, you need modify ``run-SAXSER.py``.
+                          for example:
+                          START=10
+                          END=20</pre>
+<p>
+Execute <span class="Identifier">`./selectChi.sh`</span> to extract the chi values from each cycle.``chi.dat`` file is generated. The first column is the order number of cycles, and the second colum is the chi value after every cycle. Execute `xmgrace chi.dat` to get the curve graph of ``chi.dat``.
+</p>
+
+<p>
+Execute <span class="Identifier">`./selectRg.sh`</span> to extract Rgs from each cycle. ``Rg.dat`` file is generated. The first column is the order number of cycles, and the second colum is the Rg value of every cycle. Execute `xmgrace Rg.dat` to get the curve graph of ``Rg.dat``.
+</p>
+
+<p>
+Exectue <span class="Identifier">`./rm_files.sh`</span> to delete some unimportant and unnecessary files with specific suffix to save your disk storage space. However, the files in &quot;GA001/pdbs/&quot;, &quot;GA001/curve_1/pdbs/&quot; or &quot;fit/&quot; will not be removed. Please use this script carefully.
+</p>
+<pre>
+	<span class="Identifier">`./rm_files.sh`</span>
+                             ``Y``   remove files with the suffix
+                             ``n``   do not remove
+        ``q or press 'enter' key``   exit the program
+</pre>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</body>
+</html>

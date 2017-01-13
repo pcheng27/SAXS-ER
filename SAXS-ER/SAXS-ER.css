@@ -1,0 +1,74 @@
+@charset "utf-8";
+/* CSS Document */
+/* HTML tag styles */
+body {
+  color: #000000;
+  line-height: 1.30;  
+  margin: 15px;
+  padding: 15px;
+  /*background-image: url(paper.gif);*/
+  max-width: 960px;
+  margin: 0 auto;
+  font-family:"Times New Roman"
+}
+
+/* hyperlink and anchor tag styles */
+a:link, a:visited {
+  color: #3322CC;
+  text-decoration: none;
+  font-style: normal;
+  font-weight: bold;
+}
+a:hover, a:active{
+  color: #AA4499;
+  text-decoration: underline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: large;
+}
+
+/* header tag styles */
+h1{
+    font: bold 200% Arial,sans-serif;
+    color: #332288;
+    margin: 0px;
+    padding: 0px;
+    display: block;
+}
+h2{
+    font: bold 150% Arial,sans-serif;
+    color: #117733;
+    /* border-style: solid;  */
+    margin: 0px;
+    padding: 0px;
+}
+h3{
+ font: bold 120% Arial,sans-serif;
+ color: #A6761D;
+ margin: 0px;
+ padding: 0px;
+/* border-style: solid;   */
+/* background-color: silver;   */
+}
+h4{
+ font: 100% Arial,sans-serif;
+ color: #AA4499;
+ margin: 0px;
+ padding: 0px;
+}
+h5{
+ font: 100% Arial,sans-serif;
+ color: #AA4499;
+ margin: 0px;
+ padding: 0px;
+}
+
+/* for code snippers */
+span.inline_code  {font-family:"Courier New"; font-weight: bold;}
+span.code_comment {font-family:"Times New Roman"}
+pre {
+        display: block;
+        font-family: monospace;
+        white-space: pre-wrap;
+        margin: 1em 0px 1em;
+}
