@@ -1,7 +1,4 @@
-# Web-SAXSER
-
-SAXS-ER Tutorial       
-
+# SAXS-ER Tutorial
 
 What is SAXS-ER?
 SAXS-ER is an iterative sampling method for selecting ensembles of large biomolecules that fit the experimental SAXS data. Download it here.
